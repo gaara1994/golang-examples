@@ -7,6 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/nats-io/nats.go v1.31.0
+	github.com/nitram509/lib-bpmn-engine v0.2.4
 	github.com/olivere/elastic/v7 v7.0.32
 	go.uber.org/zap v1.26.0
 	gorm.io/driver/postgres v1.5.4
@@ -14,6 +15,8 @@ require (
 )
 
 require (
+	github.com/antonmedv/expr v1.9.0 // indirect
+	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eapache/go-resiliency v1.4.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
@@ -44,6 +47,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	github.com/senseyeio/duration v0.0.0-20180430131211-7c2a214ada46 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect

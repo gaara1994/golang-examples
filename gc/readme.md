@@ -6,6 +6,8 @@ fmt 系列的打印函数会让参数“逃逸”   https://juejin.cn/post/70670
 
 通过实例理解go逃逸分析  https://tonybai.com/2021/05/24/understand-go-escape-analysis-by-example/
 
+https://juejin.cn/post/6992178559208914957
+
 如何避免逃逸发生  https://www.zhihu.com/question/592999770?write
 
 在Go语言中，内存逃逸（Memory Escape）通常发生在 **变量生命周期超出了其定义的作用域**，导致变量被分配到堆上而不是栈上。这通常发生在将局部变量传递给闭包、跨函数边界传递指针、或者当局部变量被外部引用时。
@@ -32,7 +34,7 @@ go build -gcflags="-l -m" main.go
 
  **返回值：**
 
-备注：由于声明变量必须使用，而fmt.系列的打印会导致内存逃逸，干扰结果。ps:研究了一下午为什么`a`逃逸了（TAT）
+备注：由于声明变量必须使用，而`fmt`系列的打印会导致内存逃逸，干扰结果。ps:研究了一下午为什么`a`逃逸了（TAT）
 
 ```go
 package main
@@ -125,20 +127,104 @@ yantao@ubuntu20:~/go/src/golang-examples/gc$
 
 ## 2.闭包引用
 
+**闭包是由函数和其相关的引用环境组合而成的实体**，当这个函数a被定义在另一个函数B内部，并且该内部函数a引用了外部函数B的局部变量时，即使外部函数B已经执行完毕，这些局部变量B.x的值仍然会被内部函数a（即闭包）所捕获并保持有效。
+
+```go
+package main
+
+func B() func() int {
+	var x = 10 // 这个x就是闭包要捕获的外部局部变量
+	return func() int {
+		x = x + 5 // 闭包内部必须修改x才会发生逃逸
+		return x
+	}
+}
+
+func main() {
+	resB := B() //外部函数B已经执行完毕
+	_ = resB    //B.x仍然保持有效
+}
+```
+
+```shell
+yantao@ubuntu20:~/go/src/golang-examples/gc$ go build -gcflags="-l -m" test4.go 
+# command-line-arguments
+./test4.go:4:6: moved to heap: x
+./test4.go:5:9: func literal escapes to heap
+```
+
+在实际运行时，即使你没有立即调用`resB`，变量`x`也会因为闭包的存在而逃逸到堆上。
 
 
 
+## 3.大对象或未知大小对象
 
-## 3.大对象或可变大小对象
+1.尺寸可能超过函数栈空间限制的变量。
+
+2.尺寸在编译时无法确定的对象。
+
+```go
+package main
+
+func createLargeArray(size int) []int {
+    // 这里创建了一个大小由运行时传入参数决定的切片
+    return make([]int, size)
+}
+
+func main() {
+    KnownSize := make([]int, 9) //可知大小：小（未逃逸）
+    _ = KnownSize
+    UnknownSize := make([]int, 999999) //可知大小：大（逃逸）
+    _ = UnknownSize
+
+    bigArray := createLargeArray(8) //不可知大小：无论大小（逃逸）
+    _ = bigArray
+}
+```
+
+```shell
+yantao@ubuntu20:~/go/src/golang-examples/gc$ go build -gcflags="-l -m" test5.go 
+# command-line-arguments
+./test5.go:5:13: make([]int, size) escapes to heap
+./test5.go:9:19: make([]int, 9) does not escape
+./test5.go:11:21: make([]int, 999999) escapes to heap
+
+```
+
+另外，像字符串、字节数组等，如果它们的长度在编译期间未知并且实际创建时长度较大，也会被分配到堆上。
 
 
 
+## 4.interface类型逃逸
 
+在前面我们提到过`fmt`系列的打印会导致内存逃逸。现在就来看看为什么吧。
 
-## 4.动态类型
+```go
+package main
 
+import "fmt"
 
+func main() {
+	str := "Hello"
+	fmt.Println(str)
+}
+```
 
+```shell
+yantao@ubuntu20:~/go/src/golang-examples/gc$ go build -gcflags="-l -m" test6.go 
+# command-line-arguments
+./test6.go:7:13: ... argument does not escape
+./test6.go:7:14: str escapes to heap #str逃逸到堆内存上
+```
 
+看一下`fmt.Println()`源代码
+
+```go
+func Println(a ...any) (n int, err error) {
+	return Fprintln(os.Stdout, a...)
+}
+```
+
+`Println`的形参是一个`interface{}`类型，
 
 ## 5.并发编程

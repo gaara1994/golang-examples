@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 
@@ -12,8 +13,8 @@ var DB *gorm.DB
 
 type Student struct {
 	gorm.Model
-	Name    string            `gorm:"not null;comment:'学生姓名'" json:"name"`
-	Members map[string]string `gorm:"type:jsonb;comment:'家庭成员'" json:"members"`
+	Name    string            `gorm:"not null;comment:学生姓名" json:"name"`
+	Members map[string]string `gorm:"type:jsonb;comment:家庭成员" json:"members"`
 }
 
 func (Student) TableName() string {
@@ -97,6 +98,7 @@ func select3() {
 	}
 }
 
+// 查找所有有姐妹“张春华”的学生：
 func select4() {
 	var records []StudentRecord
 	DB.Raw("SELECT * FROM students WHERE ? <@ members", `{"sister": "张春华"}`).Scan(&records)
@@ -140,11 +142,57 @@ func select8() {
 		fmt.Println("select8查询结果=", record)
 	}
 }
+
+// 查找王五的父亲的姓名
+func select9() {
+	var father string
+	DB.Raw("SELECT members->'father' FROM students WHERE name = '王五'").Scan(&father)
+	fmt.Println("select9查询结果=", father)
+}
+
+// 查找王五的母亲的姓名
+func select10() {
+	var mother string
+	DB.Raw("SELECT members->'mother' FROM students WHERE name = '王五'").Scan(mother)
+	fmt.Println("select10查询结果=", mother)
+}
+
+// 查找王五的母亲的姓名
+func select11() {
+	var mother *string
+	DB.Raw("SELECT members->'mother' FROM students WHERE name = '王五'").Scan(&mother)
+	fmt.Println("select11查询结果=", mother)
+}
+
+// 查找王五的母亲的姓名
+func select12() {
+	var mother sql.NullString
+	DB.Raw("SELECT members->'mother' FROM students WHERE name = '王五'").Scan(&mother)
+	if mother.Valid {
+		fmt.Println("select12查询结果=", mother.String)
+	} else {
+		fmt.Println("select12查询结果=暂无数据")
+	}
+}
+
+// 查找王五的父亲的姓名
+func select13() {
+	var father string
+	DB.Raw("SELECT members ->>'father' FROM students WHERE name = '王五'").Scan(&father)
+	fmt.Println("select13查询结果=", father)
+}
+
+// 查找李世民的第二个兄弟的姓名
+func select14() {
+	var father string
+	DB.Raw("SELECT members ->>'father' FROM students WHERE name = '王五'").Scan(&father)
+	fmt.Println("select14查询结果=", father)
+}
 func main() {
 	//初始化数据库
 	InitDB()
 	//1.插入多条数据
 	//InsertMultiple()
 
-	select8()
+	select13()
 }

@@ -44,10 +44,11 @@ func getPodLogs(namespace, podName, containerName string) (string, error) {
 	}
 
 	logOpts := &v1.PodLogOptions{
-		Container:    containerName,
-		Follow:       false,            // 根据需求设置是否实时追加日志
-		TailLines:    &[]int64{100}[0], // 可选，只获取最近的100行日志
-		SinceSeconds: &[]int64{60}[0],  // 可选，获取过去60秒内的日志
+		Container: containerName,
+		Follow:    false,            // 根据需求设置是否实时追加日志
+		TailLines: &[]int64{100}[0], // 可选，只获取最近的100行日志
+		//SinceSeconds: &[]int64{60}[0],  // 可选，获取过去60秒内的日志
+		Timestamps: true,
 	}
 
 	request := clientset.CoreV1().Pods(namespace).GetLogs(podName, logOpts)
@@ -67,8 +68,8 @@ func getPodLogs(namespace, podName, containerName string) (string, error) {
 
 func main() {
 	namespace := "mxsche"
-	podName := "mxschejob-tlv26-86g42"
-	containerName := "mxsche-container-54772ff8"
+	podName := "mxschejob-lxhhm-fgsgk"
+	containerName := "mxsche-container-646cca66"
 
 	logs, err := getPodLogs(namespace, podName, containerName)
 	if err != nil {

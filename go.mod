@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/IBM/sarama v1.42.1
+	github.com/Workiva/go-datastructures v1.1.3
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/gorilla/websocket v1.5.1

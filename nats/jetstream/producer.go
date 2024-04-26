@@ -22,7 +22,7 @@ func main() {
 
 	// 创建流
 	_, err = js.AddStream(&nats.StreamConfig{
-		Name:     "ORDERS",
+		Name:     "MY_STREAM",
 		Subjects: []string{"ORDERS.*"},
 	})
 	if err != nil {

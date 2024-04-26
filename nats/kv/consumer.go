@@ -28,20 +28,20 @@ func main() {
 	}
 
 	// 在桶中放置一个键
-	_, err = kv.PutString("foo", "bar")
+	_, err = kv.PutString("code", "200")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// 获取键的值
-	val, err := kv.Get("foo")
+	val, err := kv.Get("code")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Got value:", string(val.Value()))
 
 	// 删除键
-	err = kv.Delete("foo")
+	err = kv.Delete("code")
 	if err != nil {
 		log.Fatal(err)
 	}

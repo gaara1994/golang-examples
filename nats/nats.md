@@ -514,9 +514,23 @@ nats consumer next my_stream consumer1 --count 1000
 
 ### 5.清理
 
-清除流里面的数据： `nats stream purge my_stream`
+清除流里面的数据： 
 
-删除流： `nats stream rm my_stream`
+```
+nats stream purge my_stream
+```
+
+删除流：
+
+```
+nats stream rm my_stream
+```
+
+查询所有的stream
+
+```shell
+nats str ls
+```
 
 
 
@@ -556,20 +570,20 @@ JetStream 是一个持久层，流式处理只是构建在该层之上的功能�
 
 ## 键值存储演练
 
-1.创建KV桶
+### 1.创建KV桶
 
 ```shell
 nats kv add my_bucket
 ```
 
-2.存储值
+### 2.存储值
 
 ```shell
 nats kv put my_bucket code 200 
 200
 ```
 
-3.获取值
+### 3.获取值
 
 ```shell
 nats kv get my_bucket code 
@@ -580,14 +594,14 @@ my_bucket > code revision: 1 created @ 26 Apr 24 03:12 UTC
 
 ```
 
-4.watch
+### 4.watch
 
 ```shell
 nats kv watch my_bucket
 [2024-04-26 11:12:56] PUT my_bucket > code: 200
 ```
 
-5.更新
+### 5.更新
 
 ```shell
 nats kv put my_bucket code 404 
@@ -597,13 +611,13 @@ nats kv put my_bucket code 404
 
 
 
-6.删除值
+### 6.删除值
 
 ![image-20240426111854466](./assets/image-20240426111854466.png)
 
 
 
-7.删除桶
+### 7.删除桶
 
 ```shell
 nats kv rm my_bucket

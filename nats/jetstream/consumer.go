@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// 创建消费者
-	_, err = js.AddConsumer("ORDERS", &nats.ConsumerConfig{
+	_, err = js.AddConsumer("MY_STREAM", &nats.ConsumerConfig{
 		Durable: "my_consumer",
 	})
 	if err != nil {

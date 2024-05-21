@@ -31,6 +31,85 @@ func main() {
 
 
 
+gin框架引入方式一
+
+http://127.0.0.1:8080/debug/pprof/
+
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"net/http/pprof"
+)
+
+// adapter is a helper function to adapt stdlib middleware to Gin.
+func adapter(f func(http.ResponseWriter, *http.Request)) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		f(c.Writer, c.Request)
+	}
+}
+
+func main() {
+	router := gin.Default()
+
+	router.GET("/hello", func(c *gin.Context) {
+		c.String(200, "Hello, World!")
+	})
+
+	// 使用adapter包装pprof的处理器函数并应用于router
+	router.GET("/debug/pprof/", adapter(pprof.Index))
+	router.GET("/debug/pprof/heap", adapter(pprof.Handler("heap").ServeHTTP))
+	router.GET("/debug/pprof/goroutine", adapter(pprof.Handler("goroutine").ServeHTTP))
+	router.GET("/debug/pprof/block", adapter(pprof.Handler("block").ServeHTTP))
+	router.GET("/debug/pprof/mutex", adapter(pprof.Handler("mutex").ServeHTTP))
+	router.GET("/debug/pprof/threadcreate", adapter(pprof.Handler("threadcreate").ServeHTTP))
+	router.GET("/debug/pprof/profile", adapter(pprof.Profile))
+
+	// 启动服务
+	router.Run()
+}
+```
+
+
+
+gin框架引入方式二
+
+http://127.0.0.1:6060/debug/pprof/
+
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	_ "net/http/pprof" // 导入pprof包，但因为是匿名导入，所以不会自动注册处理器
+)
+
+func main() {
+	router := gin.Default()
+
+	router.GET("/hello", func(c *gin.Context) {
+		c.String(200, "Hello, World!")
+	})
+
+	go func() {
+        //使用6060端口启动pprof
+		log.Println("Starting pprof server on :6060")
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			log.Fatal("ListenAndServe: ", err)
+		}
+	}()
+	// 启动服务
+	router.Run()
+	// 默认监听 :8080，也可以指定如 router.Run(":8081")
+}
+```
+
+
+
 ## 3.启动程序
 
 ```shell

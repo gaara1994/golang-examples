@@ -16,7 +16,7 @@ func main() {
 	accessKeyID := "ROOTNAME"
 	secretAccessKey := "CHANGEME123"
 	useSSL := false
-	// 初使化 minio client对象。
+	//1.初使化 minio client对象。
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		log.Fatalln(err)
@@ -27,13 +27,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for _, bucket := range buckets {
 		fmt.Println(bucket)
 	}
 
 	// Make a new bucket called testbucket.
-	bucketName := "testbucket2"
+	bucketName := "testbucket3"
 	location := "us-east-1" //分布式minio的所在区域
 
 	//3.检查存储桶是否存在。
@@ -41,22 +40,29 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	if found {
-		log.Fatalln(bucketName, "已经存在")
+	if !found {
+		//4.创建bucket
+		err = minioClient.MakeBucket(bucketName, location)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Println(bucketName, "创建成功")
 	}
 
-	//创建bucket
-	err = minioClient.MakeBucket(bucketName, location)
+	//5.文件对象操作
+	objName := "a.txt"
+	file := "a.txt"
+	_, err = minioClient.FPutObject(bucketName, objName, file, minio.PutObjectOptions{})
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Println("创建成功", bucketName)
+	log.Println(objName, "创建成功")
 
-	//5.删除bucket
-	err = minioClient.RemoveBucket(bucketName)
+	//6.获取文件对象
+	file = "download.txt"
+	err = minioClient.FGetObject(bucketName, objName, file, minio.GetObjectOptions{})
 	if err != nil {
-		log.Println(err)
+		log.Fatalln(err)
 	}
-	log.Println("创建删除", bucketName)
+	log.Println(objName, "创建成功")
 }

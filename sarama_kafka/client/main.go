@@ -15,7 +15,8 @@ type Order struct {
 }
 
 func main() {
-	consumer, err := sarama.NewConsumer([]string{"192.168.70.31:31919"}, nil)
+	addrs := []string{"192.168.70.31:31919"}
+	consumer, err := sarama.NewConsumer(addrs, nil)
 	if err != nil {
 		fmt.Printf("fail to start consumer, err:%v\n", err)
 		return

@@ -16,6 +16,7 @@ type Order struct {
 }
 
 func main() {
+	addrs := []string{"192.168.70.31:31919"}
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
@@ -46,7 +47,7 @@ func main() {
 		Timestamp: time.Time{},
 	}
 
-	client, err := sarama.NewSyncProducer([]string{"192.168.70.31:31919"}, config)
+	client, err := sarama.NewSyncProducer(addrs, config)
 	if err != nil {
 		fmt.Println("producer closed, err:", err)
 		return

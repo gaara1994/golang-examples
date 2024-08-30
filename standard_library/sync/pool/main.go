@@ -55,16 +55,17 @@ func main() {
 	}
 
 	//读取文件
-	// 读取文件
 	go func() {
 		file := manager.GetFileHandle()
 		defer manager.ReleaseFileHandle(file)
-		content, err := file.Read(make([]byte, 1024))
+		buffer := make([]byte, 1024)
+		n, err := file.Read(buffer)
 		if err != nil {
 			fmt.Println("Error reading from file:", err)
 			return
 		}
-		fmt.Printf("Content: %s\n", content)
+		content := buffer[:n]                        // 截取实际读取到的字节数
+		fmt.Printf("Content: %s\n", string(content)) // 使用 string() 将字节切片转换为字符串
 	}()
 
 	time.Sleep(2 * time.Second)

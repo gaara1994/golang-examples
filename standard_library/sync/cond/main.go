@@ -18,7 +18,7 @@ func main() {
 		mutex.Lock()                // 获取锁
 		time.Sleep(3 * time.Second) // 模拟数据准备时间
 		data = 99                   // 生产数据
-		fmt.Println("数据已准备好")
+		fmt.Println("生产者：数据已准备好")
 		ready = true   // 通知消费者数据已准备好
 		cond.Signal()  // 发送通知
 		mutex.Unlock() // 解锁
@@ -28,10 +28,10 @@ func main() {
 	go func() {
 		mutex.Lock() // 获取锁
 		for ready == false {
-			fmt.Println("等待数据...")
+			fmt.Println("消费者：等待数据...")
 			cond.Wait() // 等待通知，由于cond.Wait()，导致goroutine阻塞在此,直到cond.Signal()被调用,goroutine才会继续执行
 		}
-		fmt.Printf("数据是: %d\n", data)
+		fmt.Printf("消费者：数据是: %d\n", data)
 		mutex.Unlock() // 解锁
 	}()
 

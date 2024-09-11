@@ -26,7 +26,7 @@ import (
 	"fmt"  // 标准输出包
 	"sync" // 同步包，提供同步原语如互斥锁
 	"time" // 时间处理包，用于本例中的延迟等待
-)
+)d
 
 // count 是一个共享的整数变量
 var count int
@@ -378,7 +378,7 @@ func main() {
 
 # 5.Cond
 
-在讲cond之前，我们先看一下什么事轮询。
+在讲cond之前，我们先看一下什么是轮询。
 
 ```go
 package main
@@ -396,7 +396,7 @@ func main() {
 	go func() {
 		time.Sleep(3 * time.Second) // 模拟数据准备时间
 		data = 99                   // 生产数据
-		fmt.Println("数据已准备好")
+		fmt.Println("生产者：数据已准备好")
 		ready = true // 通知消费者数据已准备好
 	}()
 
@@ -404,9 +404,9 @@ func main() {
 	go func() {
 		for ready == false {
 			// 没有准备好数据时就会一直轮询
-			fmt.Println("等待数据...")
+			fmt.Println("消费者：等待数据...")
 		}
-		fmt.Printf("数据是: %d\n", data)
+		fmt.Printf("消费者：数据是: %d\n", data)
 	}()
 
 	// 主 goroutine 等待一段时间以确保其他 goroutines 已经完成
@@ -419,13 +419,13 @@ func main() {
 
 ```shell
 (省略上面的)
-等待数据...
-等待数据...
-等待数据...
-等待数据...
-数据已准备好
-等待数据...
-数据是: 99
+消费者：等待数据...
+消费者：等待数据...
+消费者：等待数据...
+消费者：等待数据...
+生产者：数据已准备好
+消费者：等待数据...
+消费者：数据是: 99
 ```
 
 这个输出显示了：
@@ -434,7 +434,7 @@ func main() {
 - 生产者 goroutine 设置数据。
 - 消费者 goroutine 检测到数据已准备好，并打印数据。
 
-这就是轮询，如果条件一直不是我们想要的，for循环就会一直执行下去。问题如下：
+这就是轮询，在一个条件下，for循环就会一直执行下去，直到条件改变。问题如下：
 
 1. **CPU 使用率**: 轮询方式会持续消耗 CPU 时间片，即使没有数据准备好。为了避免这种情况，我们加入了 `time.Sleep` 来降低 CPU 的负载。
 2. **效率问题**: 使用条件变量可以更有效地处理等待状态，因为它可以让 goroutine 休眠并等待条件变化的通知，而不是不断地检查条件。
@@ -476,7 +476,7 @@ func main() {
 		data = 99                   // 生产数据
 		fmt.Println("数据已准备好")
 		ready = true   // 通知消费者数据已准备好
-		cond.Signal()  // 发送通知
+		cond.Signal()  // 发送信号，唤醒goroutine
 		mutex.Unlock() // 解锁
 	}()
 
@@ -526,7 +526,7 @@ func main() {
    - 获取锁 `mutex.Lock()`。
    - 使用 `for ready == false` 循环检查数据是否准备好。
    - 如果数据未准备好，则调用 `cond.Wait()` 使 goroutine 进入等待状态。
-   - 一旦数据准备好，即 `ready` 变为 `true`，goroutine 继续执行并打印数据。
+   - 一旦数据准备好，即 `ready` 变为 `true`，并且goroutine被唤醒， 继续执行并打印数据。
    - 释放锁 `mutex.Unlock()`。
 5. **主 goroutine**:
    - 等待一段时间 `time.Sleep(5 * time.Second)` 以确保其他 goroutines 已经完成。
